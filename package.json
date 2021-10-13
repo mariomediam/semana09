@@ -1,0 +1,12 @@
+{
+  "name": "bodega",
+  "version": "1.0.0",
+  "description": "Proyecto usando TS con pasarela de pagos",
+  "main": "index.js",
+  "repository": "https://github.com/mariomediam/semana09.git",
+  "author": "mariomediam <54757091+mariomediam@users.noreply.github.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
