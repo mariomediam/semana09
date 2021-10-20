@@ -4,12 +4,16 @@ import {Request, Response} from "express"
 import { Usuarios } from "../config/models";
 import { RegsitroDto } from "../dtos/request/registro.dto";
 import { UsuarioDto } from "../dtos/response/usuario.dto";
-import { sign } from "jsonwebtoken";
+import { sign, SignOptions } from "jsonwebtoken";
 import { TipoUsuario } from "../models/usuarios.models";
 import { LoginDto } from "../dtos/request/login.dto";
 import { compareSync } from "bcrypt"
 import { RequestUser } from "../middlewares/validator";
+import { v2 } from "cloudinary";
 
+const tokenOptions: SignOptions = {
+    expiresIn: "1h"
+}
 
 interface Payload {
     usuarioNombre: string
@@ -60,7 +64,7 @@ export const registroController = async (req: Request, res: Response) => {
             usuarioFoto: nuevoUsuario.getDataValue("usuarioFoto"),
         }
         
-        const jwt = sign(payload, process.env.JWT_TOKEN ?? "", {expiresIn: "1h" })
+        const jwt = sign(payload, process.env.JWT_TOKEN ?? "", tokenOptions)
 
         const content = plainToClass(UsuarioDto, {...nuevoUsuario.toJSON(), usuarioJwt: jwt,})
 
@@ -113,7 +117,7 @@ export const login = async (req: Request, res:Response) => {
             usuarioFoto: usuarioEncontrado.getDataValue("usuarioFoto"),
         }
 
-        const jwt = sign(payload, process.env.JWT_TOKEN ?? "")
+        const jwt = sign(payload, process.env.JWT_TOKEN ?? "", tokenOptions)
 
         return res.json({
             content: jwt,
@@ -135,8 +139,21 @@ export const login = async (req: Request, res:Response) => {
 export const perfil = (req: RequestUser, res: Response) => {
     
     const content = plainToClass(UsuarioDto, req.usuario)
+    if (!content.usuarioFoto){
+        let [nombre, apellido] = content.usuarioNombre.split(" ")
+        content.usuarioFoto = `https://avatars.dicebear.com/api/initials/${nombre[0]}${apellido ? apellido[0] : ""}.svg`
+    }
+    else {
+        const url = v2.url(content.usuarioFoto,{
+            width:100,
+            angle:45,
+            transformation: {effect: "cartoonify"},
+        })
+        content.usuarioFoto=url
+    }
     return res.json({
         message: "Hola desde endpoint final",
         content,
     })
 }
+

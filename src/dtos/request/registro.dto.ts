@@ -24,4 +24,8 @@ export class RegsitroDto{
     @IsEnum(TipoUsuario)
     @IsOptional()
     usuarioTipo?: TipoUsuario
+
+    @IsOptional()
+    @IsString()
+    usuarioFoto?: string;
 }
